@@ -1,18 +1,18 @@
 import speech_recognition as sr
 
 def ouvir_comando():
-    r = sr.Recognizer()
+    recognizer = sr.Recognizer()
     with sr.Microphone() as source:
-        print("Fale agora...")
-        r.adjust_for_ambient_noise(source)
-        audio = r.listen(source)
+        print("Ouvindo comando...")
+        audio = recognizer.listen(source)
 
         try:
-            comando = r.recognize_google(audio, language="pt-BR")
-            print("Você disse:", comando)
+            comando = recognizer.recognize_google(audio, language="pt-BR")
+            print(f"Comando reconhecido: {comando}")
             return comando.lower()
         except sr.UnknownValueError:
-            print("Não entendi. Tente de novo.")
+            print("Não entendi o comando.")
         except sr.RequestError:
-            print("Erro no serviço de reconhecimento.")
-        return ""
+            print("Erro na requisição ao serviço de reconhecimento.")
+
+    return ""
