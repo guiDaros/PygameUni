@@ -17,7 +17,7 @@ executables = [
         "main.py",
         base=base,
         target_name="SobrevivenciaEspacial.exe", # Nome do executável
-        icon="Recursos/imagens/nave_personagem.ico" # Opcional: ícone do executável (mude para .ico se for usar)
+        icon="recursos/imagens/nave.png" # Opcional: ícone do executável (mude para .ico se for usar)
     )
 ]
 
@@ -35,11 +35,9 @@ build_options = {
 setup(
     name="SobrevivenciaEspacial",
     version="1.0",
-    description="Um jogo simples de sobrevivência espacial.",
+    description="Um jogo onde o Iron Marcio tem que esquivar das roçadeiras",
     options={"build_exe": build_options},
     executables=executables
 )
 
 print("\nExecutável gerado na pasta 'build/exe.PLATFORMA-VERSAO_PYTHON/'")
-print("Certifique-se de que o arquivo 'Recursos/imagens/nave_personagem.ico' existe.")
-
