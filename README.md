@@ -1,13 +1,10 @@
-Sobrevivência Espacial
-Um jogo simples de sobrevivência espacial desenvolvido em Python com Pygame.
+Jogo do Iron Marcio
+Um jogo simples onde o personagem tem que desviar dos obstaculos, desenvolvido em Python com Pygame.
 
 Nome do Desenvolvedor 
 Guilherme Vassoller Daros
 
 RA (1138143)
-
-Pequena Descrição da História do Jogo
-Em "Sobrevivência Espacial", você é um piloto habilidoso de uma nave espacial em meio a um campo de asteroides perigoso. Sua missão é desviar dos destroços que caem do céu, aprimorando seus reflexos e sua pontuação. A cada asteroide desviado, sua pontuação aumenta, mas a ameaça também cresce, pois a velocidade dos asteroides se intensifica. Quanto tempo você consegue sobreviver neste ambiente hostil?
 
 Tecnologias Utilizadas
 Python: Linguagem de programação principal.
