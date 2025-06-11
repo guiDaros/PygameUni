@@ -58,10 +58,10 @@ O executável será criado na pasta dist/SobrevivenciaEspacial/.
 
 
 
-Colaboração:
+Colaboração: 
 
 -Testador do Jogo
 
-Nome: 
+Nome: João Paulo Pasolini
 
-RA: 
+RA: 1138273
