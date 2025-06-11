@@ -16,7 +16,7 @@ pygame.font.init()
 pygame.mixer.init() # Para sons, se você adicionar depois
 engine = pyttsx3.init() # Inicializa o motor de fala
 
-# Configurações da tela
+# --- Configurações da tela ---
 LARGURA_TELA = 1000
 ALTURA_TELA = 700
 TELA = pygame.display.set_mode((LARGURA_TELA, ALTURA_TELA))
@@ -24,7 +24,7 @@ pygame.display.set_caption("Sobrevivência Espacial")
 
 # Ícone do jogo (opcional: substitua por um .ico ou .png menor)
 try:
-    icone = pygame.image.load('recursos/imagens/nave.png')
+    icone = pygame.image.load('Recursos/imagens/nave.png')
     pygame.display.set_icon(icone)
 except pygame.error:
     print("Aviso: Não foi possível carregar o ícone do jogo. Usando ícone padrão.")
@@ -48,6 +48,9 @@ FONTE_PAUSE = pygame.font.Font(None, 100)
 # --- Variáveis do Jogo ---
 PLAYER_NAME = ""
 GAME_STATE = "INPUT_NOME" # Estados: INPUT_NOME, BOAS_VINDAS, JOGO, PAUSE, GAME_OVER
+welcome_speech_played = False # Flag para garantir que a mensagem de boas-vindas da voz só toque uma vez
+listening_for_name = False # Flag para indicar que o reconhecimento de voz está ativo
+voice_feedback_message = "" # Mensagem para feedback de voz na tela
 
 # Personagem (Nave Espacial)
 try:
@@ -256,7 +259,7 @@ def desenhar_botao(texto, x, y, largura, altura, cor_normal, cor_hover):
 
 def tela_input_nome():
     """Tela para o jogador digitar o nome e usar reconhecimento de voz."""
-    global PLAYER_NAME, GAME_STATE
+    global PLAYER_NAME, GAME_STATE, listening_for_name, voice_feedback_message
     TELA.fill(PRETO)
     
     # Desenha o título
@@ -275,34 +278,18 @@ def tela_input_nome():
 
     # Botão para reconhecimento de voz
     if desenhar_botao("Falar Nome", LARGURA_TELA // 2 - 100, 320, 200, 50, AZUL, VERDE):
-        try:
-            r = sr.Recognizer()
-            with sr.Microphone() as source:
-                engine.say("Por favor, diga seu nome agora.")
-                engine.runAndWait()
-                print("Ouvindo...")
-                audio = r.listen(source, timeout=5)
-            
-            player_name_voice = r.recognize_google(audio, language='pt-BR')
-            PLAYER_NAME = player_name_voice.strip()
-            engine.say(f"Olá, {PLAYER_NAME}. Nome confirmado.")
-            engine.runAndWait()
-            print(f"Nome reconhecido por voz: {PLAYER_NAME}")
-            if PLAYER_NAME: # Se o nome foi reconhecido com sucesso
-                GAME_STATE = "BOAS_VINDAS"
+        listening_for_name = True
+        voice_feedback_message = "Ouvindo..."
+        if engine._isBusy: # Garante que nada esteja falando antes de um novo prompt
+            engine.stop()
+        engine.say("Por favor, diga seu nome agora.")
+        engine.runAndWait() # Bloqueia brevemente para a fala do prompt
 
-        except sr.UnknownValueError:
-            print("Não foi possível entender o áudio.")
-            engine.say("Desculpe, não consegui entender. Por favor, tente novamente.")
-            engine.runAndWait()
-        except sr.RequestError as e:
-            print(f"Erro no serviço de reconhecimento de voz; {e}")
-            engine.say("Erro no serviço de reconhecimento de voz. Por favor, verifique sua conexão com a internet.")
-            engine.runAndWait()
-        except Exception as e:
-            print(f"Ocorreu um erro inesperado no reconhecimento de voz: {e}")
-            engine.say("Ocorreu um erro inesperado no reconhecimento de voz.")
-            engine.runAndWait()
+    # Exibe feedback de voz
+    if voice_feedback_message:
+        feedback_render = FONTE_PEQUENA.render(voice_feedback_message, True, BRANCO)
+        feedback_rect = feedback_render.get_rect(center=(LARGURA_TELA // 2, 380))
+        TELA.blit(feedback_render, feedback_rect)
 
     # Botão para continuar (se o nome foi digitado)
     if PLAYER_NAME and desenhar_botao("Continuar", LARGURA_TELA // 2 - 100, 400, 200, 50, VERDE, AZUL):
@@ -311,7 +298,7 @@ def tela_input_nome():
 
 def tela_boas_vindas():
     """Tela de boas-vindas com nome do jogador e explicação do jogo."""
-    global GAME_STATE
+    global GAME_STATE, welcome_speech_played
     TELA.fill(PRETO)
     
     saudacao = FONTE_TITULO.render(f"Bem-vindo(a), {PLAYER_NAME}!", True, AMARELO)
@@ -339,16 +326,21 @@ def tela_boas_vindas():
         personagem_rect.center = (LARGURA_TELA // 2, ALTURA_TELA - 50)
         ASTEROIDE_INICIAL_VELOCIDADE = 3 # Reseta a velocidade inicial dos asteroides
         GAME_STATE = "JOGO"
-    
-    # Lê a mensagem de boas-vindas
-    welcome_text = f"Olá, {PLAYER_NAME}. {explicacao[0]} {explicacao[1]} {explicacao[2]} {explicacao[3]} Para iniciar, clique no botão."
-    engine.say(welcome_text)
-    engine.runAndWait()
+        welcome_speech_played = False # Reseta a flag para uma possível nova partida
+
+    # Lê a mensagem de boas-vindas APENAS UMA VEZ
+    if not welcome_speech_played:
+        welcome_text = f"Olá, {PLAYER_NAME}. {explicacao[0]} {explicacao[1]} {explicacao[2]} {explicacao[3]} Para iniciar, clique no botão."
+        if engine.isBusy:
+            engine.stop()
+        engine.say(welcome_text)
+        engine.runAndWait()
+        welcome_speech_played = True
 
 
 def tela_game_over():
     """Tela de fim de jogo, mostrando Game Over e os últimos scores."""
-    global GAME_STATE
+    global GAME_STATE, welcome_speech_played
     TELA.fill(PRETO)
 
     game_over_texto = FONTE_TITULO.render("GAME OVER", True, VERMELHO)
@@ -386,6 +378,8 @@ def tela_game_over():
         GAME_STATE = "INPUT_NOME" # Volta para a tela de input de nome para novo jogador ou mesmo jogador
         PLAYER_NAME = "" # Limpa o nome para que a tela de input apareça novamente
         score = 0 # Reseta a pontuação
+        welcome_speech_played = False # Reseta a flag para que a mensagem de boas-vindas toque na próxima vez
+        voice_feedback_message = "" # Limpa feedback de voz
 
     # Botão de Sair (opcional, para conveniência)
     if desenhar_botao("Sair do Jogo", LARGURA_TELA // 2 - 150, ALTURA_TELA - 40, 300, 50, CINZA_ESCURO, VERMELHO):
@@ -414,8 +408,10 @@ while running:
                         GAME_STATE = "BOAS_VINDAS"
                 elif event.key == pygame.K_BACKSPACE:
                     PLAYER_NAME = PLAYER_NAME[:-1]
+                    voice_feedback_message = "" # Limpa feedback ao digitar
                 else:
                     PLAYER_NAME += event.unicode
+                    voice_feedback_message = "" # Limpa feedback ao digitar
         elif GAME_STATE == "JOGO":
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
@@ -426,6 +422,62 @@ while running:
                     GAME_STATE = "JOGO"
 
     # --- Lógica de Atualização por Estado ---
+    if GAME_STATE == "INPUT_NOME" and listening_for_name:
+        # A lógica de reconhecimento de voz é executada aqui no loop principal
+        # para evitar múltiplos cliques no botão "Falar Nome" iniciarem várias instâncias.
+        # Ele ainda bloqueia, mas só quando a flag 'listening_for_name' é True.
+        try:
+            r = sr.Recognizer()
+            with sr.Microphone() as source:
+                # O prompt de voz já foi dado quando o botão foi clicado
+                print("Ouvindo...")
+                audio = r.listen(source, timeout=5, phrase_time_limit=3) # Adiciona limite de tempo para frase
+            
+            player_name_voice = r.recognize_google(audio, language='pt-BR')
+            PLAYER_NAME = player_name_voice.strip()
+            if engine._isBusy:
+                engine.stop()
+            engine.say(f"Olá, {PLAYER_NAME}. Nome confirmado.")
+            engine.runAndWait()
+            voice_feedback_message = f"Nome reconhecido: {PLAYER_NAME}"
+            print(f"Nome reconhecido por voz: {PLAYER_NAME}")
+            if PLAYER_NAME: # Se o nome foi reconhecido com sucesso
+                GAME_STATE = "BOAS_VINDAS"
+                listening_for_name = False # Desativa a escuta
+        except sr.UnknownValueError:
+            print("Não foi possível entender o áudio.")
+            voice_feedback_message = "Desculpe, não consegui entender. Tente novamente."
+            if engine._isBusy:
+                engine.stop()
+            engine.say("Desculpe, não consegui entender. Por favor, tente novamente.")
+            engine.runAndWait()
+            listening_for_name = False # Desativa a escuta para permitir novo clique
+        except sr.WaitTimeoutError:
+            print("Tempo de espera excedido para reconhecimento de voz.")
+            voice_feedback_message = "Nenhum áudio detectado. Tente novamente."
+            if engine._isBusy:
+                engine.stop()
+            engine.say("Tempo esgotado. Por favor, tente novamente.")
+            engine.runAndWait()
+            listening_for_name = False
+        except sr.RequestError as e:
+            print(f"Erro no serviço de reconhecimento de voz; {e}")
+            voice_feedback_message = f"Erro de serviço: {e}"
+            if engine._isBusy:
+                engine.stop()
+            engine.say("Erro no serviço de reconhecimento de voz. Por favor, verifique sua conexão com a internet.")
+            engine.runAndWait()
+            listening_for_name = False
+        except Exception as e:
+            print(f"Ocorreu um erro inesperado no reconhecimento de voz: {e}")
+            voice_feedback_message = f"Erro inesperado: {e}"
+            if engine._isBusy:
+                engine.stop()
+            engine.say("Ocorreu um erro inesperado no reconhecimento de voz.")
+            engine.runAndWait()
+            listening_for_name = False
+
+
     if GAME_STATE == "JOGO":
         # Movimento do personagem com o mouse no eixo X
         mouse_x, _ = pygame.mouse.get_pos()
@@ -438,16 +490,15 @@ while running:
 
         # Geração de asteroides
         frame_count += 1
-        if frame_count % int(ASTEROIDE_SPAWN_TAXA - (score * velocidade_aumento_fator * 10)) == 0:
+        # Ajusta a taxa de spawn baseada na pontuação para aumentar a dificuldade
+        # Garante que a taxa de spawn nunca seja muito baixa (não menos que 10 frames)
+        spawn_rate_adjusted = max(10, ASTEROIDE_SPAWN_TAXA - int(score * velocidade_aumento_fator * 100))
+        if frame_count % spawn_rate_adjusted == 0:
             criar_asteroide()
         
         mover_asteroides()
         mover_satelite()
         verificar_colisoes() # Pode mudar o GAME_STATE para GAME_OVER
-
-        # Limita a taxa de spawn para não ficar negativa
-        if ASTEROIDE_SPAWN_TAXA - (score * velocidade_aumento_fator * 10) < 10:
-            ASTEROIDE_SPAWN_TAXA = 10
 
     # --- Renderização por Estado ---
     if GAME_STATE == "INPUT_NOME":
@@ -472,4 +523,7 @@ while running:
     pygame.display.flip()
     clock.tick(FPS)
 
+# Finaliza o motor de fala e o Pygame
+if engine._isBusy:
+    engine.stop()
 pygame.quit()
