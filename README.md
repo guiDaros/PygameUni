@@ -30,20 +30,7 @@ Pausa: Pressione a tecla ESPAÇO (Space) a qualquer momento para pausar o jogo. 
 
 Fim de Jogo: A partida termina se sua nave colidir com um asteroide. A tela de Game Over mostrará sua pontuação e os últimos 5 registros de partidas.
 
-Estrutura do Projeto
-seu_jogo/
-├── main.py                     # Código principal do jogo
-├── setup.py                    # Script para gerar o executável
-├── README.md                   # Este arquivo
-└── Recursos/                   # Pasta para todos os assets do jogo
-    ├── imagens/
-    │   ├── fundo_estrelas.png  # Imagem de fundo do jogo (substitua)
-    │   ├── nave_personagem.png # Imagem do personagem (substitua)
-    │   └── asteroide.png       # Imagem do asteroide/inimigo (substitua)
-    │   └── objeto_circulando.png # Imagem do objeto decorativo (substitua)
-    ├── sons/                   # Sons do jogo (opcional)
-    ├── fontes/                 # Fontes do jogo (opcional)
-    └── funcoes_uteis.py        # Módulo com funções auxiliares (ex: desenhar texto multilinha)
+
 
 Configuração e Instalação
 Clone o repositório:
@@ -68,11 +55,13 @@ python setup.py
 
 O executável será criado na pasta dist/SobrevivenciaEspacial/.
 
-Colaboravção e Commits
-Este projeto foi desenvolvido seguindo as diretrizes de controle de versão (Git). Espera-se que o repositório contenha commits descritivos para cada etapa de desenvolvimento.
 
 
-Testador do Jogo
+
+Colaboração:
+
+-Testador do Jogo
+
 Nome: 
 
 RA: 
