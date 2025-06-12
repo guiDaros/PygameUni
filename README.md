@@ -62,3 +62,10 @@
     <li style="margin-bottom: 0.8em;"><strong style="color: #333;">Nome:</strong> João Paulo Pasolini</li>
     <li style="margin-bottom: 0.8em;"><strong style="color: #333;">RA:</strong> 1138273</li>
 </ul>
+
+<h2 style="font-size: 2em; color: #0056b3; margin-bottom: 1em;"><span style="margin-right: 10px;">🤝</span>Colaboração</h2>
+<h3 style="font-size: 1.4em; color: #0056b3; margin-bottom: 0.8em;">Testador do Jogo</h3>
+<ul style="list-style-type: none; padding-left: 20px;">
+    <li style="margin-bottom: 0.8em;"><strong style="color: #333;">Nome:</strong> Eduardo Pagliarini Herter</li>
+    <li style="margin-bottom: 0.8em;"><strong style="color: #333;">RA:</strong> 1138269</li>
+</ul>
